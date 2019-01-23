@@ -215,6 +215,23 @@ printf(
 
 		"    CMDOW 0x0E0144 /hid /ren \"10%% complete\" /mov 0 0 /siz 300 100 /act /vis\n");
 	}
+	else if((!lstrcmpi("/SLP", cmd)) ||
+			(!lstrcmpi("/WAIT", cmd)) ||
+			(!lstrcmpi("milliseconds", cmd)) ||
+			(!lstrcmpi("/milliseconds", cmd))) {
+		printf(
+		"This form of CMDOW delays action(s) on the specified window(s).\n\n"
+//		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+		"  CMDOW window {[/SLP milliseconds] [/WAIT [milliseconds]]} ...\n\n"
+//		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+		"  /SLP    Sleep the specified number of milliseconds.\n"
+		"  /WAIT   Wait the specified number of milliseconds (default is indefinite) for\n"
+		"          the window to exist.\n\n");
+//		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+		printf(
+		"  /WAIT by itself (i.e. with no other actions) can be used to test if the\n"
+		"  window exists; it will return immediately, without any error message.\n");
+	}
 	else if((!lstrcmpi("/RUN", cmd)) ||
 			(!lstrcmpi("state", cmd)) ||
 			(!lstrcmpi("/state", cmd)) ||
@@ -264,7 +281,7 @@ printf(
 		"  CMDOW /TH | /TV | /MA | /CW | /UW | /AT | /FS | /WM\n"
 		"  CMDOW window {[/ACT] [/INA] [/ENA] [/DIS] [/VIS] [/HID] [/MIN] [/MAX] [/RES]\n"
 		"        [/REN caption] [/TOP] [/NOT] [/MOV left top] [/SIZ width height] [/CLS]\n"
-		"        [/END]}\n"
+		"        [/END] [/SLP milliseconds] [/WAIT [milliseconds]]}\n"
 		"  CMDOW /RUN [state] file [args]\n\n");
 //		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 		printf(
@@ -287,7 +304,8 @@ printf(
 		"  /RES    Restore specified window.     /REN    Rename specified window.\n"
 		"  /TOP    Make window always on top.    /NOT    Make window not always on top.\n"
 		"  /MOV    Move specified window.        /SIZ    Resize specified window.\n"
-		"  /CLS    Close specified window.       /END    Kill process linked to window.\n\n");
+		"  /CLS    Close specified window.       /END    Kill process linked to window.\n"
+		"  /SLP    Sleep for a time.             /WAIT   Wait for the window to exist.\n\n");
 //		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 		printf(
 		"  /RUN    Executes or opens specified file using associated application.\n"

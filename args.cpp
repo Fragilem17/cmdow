@@ -22,6 +22,9 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	*a->tasks = (TASK) 0;
 	a->listopts = 0;
 	a->actopts = 0;
+	a->sleep = 0;
+	a->wait = 0;
+	a->wait_ms = -1;
 	a->cc = 0;
 	a->helpcmd = NULL;
 	a->myhwnd = GetMyHandle();
@@ -74,6 +77,16 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 		else if(!lstrcmpi("/CLS", argv[i])) PushTask(a->tasks, CLS);
 		else if(!lstrcmpi("/TOP", argv[i])) PushTask(a->tasks, TOP);
 		else if(!lstrcmpi("/NOT", argv[i])) PushTask(a->tasks, NOT);
+		else if(!lstrcmpi("/WAIT", argv[i])) {
+			a->wait = 1;
+			//
+			// next arg MAY be the wait time in milliseconds
+			//
+			if( (i+1) < argc) {
+				int ms = atoi(argv[i+1]);
+				if( (ms) || !lstrcmp(argv[i+1], "0") ) a->wait_ms = ms, ++i;
+				}
+			}
 		else if(!lstrcmpi("/MOV", argv[i])) {
 			PushTask(a->tasks, MOV);
 			//
@@ -115,6 +128,17 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 			PushTask(a->tasks, RCW);
 			if( (i+1) < argc) LoadString(&a->newcapt, argv[++i]);
 			else Quit(RENERR);
+			}
+		else if(!lstrcmpi("/SLP", argv[i])) {
+			//
+			// next arg MUST be the sleep time
+			//
+			PushTask(a->tasks, SLP);
+			if( (i+1) < argc) {
+				a->sleep = atoi(argv[++i]);
+				if( (!a->sleep) && lstrcmp(argv[i-1], "0") ) Quit(SLPERR);
+				}
+			else Quit(SLPERR);
 			}
 		else if(!lstrcmpi("/RUN", argv[i])) {
 			PushTask(a->tasks, RUN);
@@ -202,7 +226,7 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	else if(form2) { // op on all windows, one arg and no caption
 		if(a->cc || (form2 > 1) ) Quit(INCARG);
 	}
-	else { // form1. If caption do a LST else LISTALL
+	else if(!a->wait) { // form1. If caption do a LST else LISTALL, unless WAIT
 		if( (a->listopts & SHOWTB) && (a->cc) ) Quit(INCARG);
 		if(a->cc) PushTask(a->tasks, LST);
 		else PushTask(a->tasks, LISTALL);
@@ -292,7 +316,8 @@ void Quit(const int Err)
 		"Unable to retrieve image names",									/* BADIMG 9 */
 		"Too many tasks have been specified",								/* TASKOL 10 */
 		"Unable to execute/open specified file",							/* EXEERR 11 */
-		"Only the /? and /RUN commands are supported on W95/98/ME platforms"/* VERERR 12 */
+		"Only the /? and /RUN commands are supported on W95/98/ME platforms",/* VERERR 12 */
+		"/SLP command requires milliseconds argument"                       /* SLPERR 13 */
 	};
 
 	DWORD cbWritten;
