@@ -1,7 +1,7 @@
 # Simple VC (6) makefile for Cmdow.
 
 CPPFLAGS = /nologo /W3 /O2 /MD
-LIBS = user32.lib advapi32.lib shell32.lib
+LIBS = user32.lib shell32.lib
 OBJS = obj\main.obj obj\args.obj obj\tlist.obj obj\wlist.obj obj\help.obj
 
 LD = $(CC)

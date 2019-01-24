@@ -113,9 +113,7 @@ void ShowHelp(char *);
 void Quit(const int Err);
 
 /* tlist.c functions */
-//BOOL EnableDebugPrivNT(void);
-//void GetTaskList(struct TLIST *);
-char *GetImageName(long);
+char *GetImageName(DWORD);
 
 /* wlist.c functions */
 HWND GetMyHandle(void);
