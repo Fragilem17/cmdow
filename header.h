@@ -66,6 +66,22 @@ enum ACTOPTS {
 	DONTBLAMEME = 0x0001			/* Allows actions to be performed on more than one window */
 };
 
+enum MOVOPTS {
+	MOVLEFT 	= 0x0001,			/* Move relative to left of monitor */
+	MOVTOP		= 0x0002,			/* Move relative to top of monitor */
+	MOVRIGHT	= 0x0004,			/* Move relative to right of monitor */
+	MOVBOTTOM	= 0x0008,			/* Move relative to bottom of monitor */
+	MOVHORZPC	= 0x0010,			/* Horizontal move is percentage of monitor width */
+	MOVVERTPC	= 0x0020,			/* Vertical move is percentage of monitor height */
+};
+
+enum SIZOPTS {
+	SIZLEFT 	= 0x0001,			/* Size by moving left edge, not right */
+	SIZTOP		= 0x0002,			/* Size by moving top edge, not bottom */
+	SIZWIDTHPC	= 0x0004,			/* Size relative to monitor width */
+	SIZHEIGHTPC = 0x0008,			/* Size relative to monitor height */
+};
+
 struct ARGS {
 	char			*caption;		/* Caption to list, or operate on */
 	char			*newcapt;		/* New caption, used with /REN */
@@ -78,6 +94,8 @@ struct ARGS {
 	int 			actopts;		/* Options for actions upon selected windows */
 	int				left, top;		/* Holds coords for moving window */
 	int				width, height;	/* Used for resizing a window */
+	int 			movopts;		/* Options for moving a window */
+	int 			sizopts;		/* Options for sizing a window */
 	int 			sleep;			/* Sleep milliseconds */
 	int 			wait, wait_ms;	/* If waiting, and for how long */
 	char			*file;			/* File to open/run, used with /RUN */
