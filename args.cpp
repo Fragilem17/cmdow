@@ -9,6 +9,7 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	int form4;	/* count of form4 options - run/open a program/file */
 	int form5;  /* count of form5 options - rename this console window 7*/
 	int fcount;	/* count of number of forms used */
+	int exist;	/* test window exists (implemented via taskless wait) */
 
 	//
 	// init the args struct
@@ -22,10 +23,14 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	*a->tasks = (TASK) 0;
 	a->listopts = 0;
 	a->actopts = 0;
+	a->sleep = 0;
+	a->wait = 0;
+	a->wait_ms = -1;
 	a->cc = 0;
 	a->helpcmd = NULL;
 	a->myhwnd = GetMyHandle();
 	LoadString(&a->exename, argv[0]);
+	exist = FALSE;
 
 	//
 	// if no args default task is to list all windows
@@ -46,6 +51,10 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 			if(argc != 2) LoadString(&a->helpcmd, argv[++i]);
 			PushTask(a->tasks, HELP);
 			return;
+		}
+		else if(!lstrcmpi("/E", argv[i])) {
+			exist = 1;
+			a->wait = 1;
 		}
 		else if(!lstrcmpi("/B", argv[i])) a->listopts |= BARE;
 		else if(!lstrcmpi("/F", argv[i])) a->listopts |= FULLCAPT;
@@ -74,6 +83,16 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 		else if(!lstrcmpi("/CLS", argv[i])) PushTask(a->tasks, CLS);
 		else if(!lstrcmpi("/TOP", argv[i])) PushTask(a->tasks, TOP);
 		else if(!lstrcmpi("/NOT", argv[i])) PushTask(a->tasks, NOT);
+		else if(!lstrcmpi("/WAIT", argv[i])) {
+			a->wait = 1;
+			//
+			// next arg MAY be the wait time in milliseconds
+			//
+			if( (i+1) < argc) {
+				int ms = atoi(argv[i+1]);
+				if( (ms) || !lstrcmp(argv[i+1], "0") ) a->wait_ms = ms, ++i;
+				}
+			}
 		else if(!lstrcmpi("/MOV", argv[i])) {
 			PushTask(a->tasks, MOV);
 			//
@@ -115,6 +134,17 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 			PushTask(a->tasks, RCW);
 			if( (i+1) < argc) LoadString(&a->newcapt, argv[++i]);
 			else Quit(RENERR);
+			}
+		else if(!lstrcmpi("/SLP", argv[i])) {
+			//
+			// next arg MUST be the sleep time
+			//
+			PushTask(a->tasks, SLP);
+			if( (i+1) < argc) {
+				a->sleep = atoi(argv[++i]);
+				if( (!a->sleep) && lstrcmp(argv[i-1], "0") ) Quit(SLPERR);
+				}
+			else Quit(SLPERR);
 			}
 		else if(!lstrcmpi("/RUN", argv[i])) {
 			PushTask(a->tasks, RUN);
@@ -167,7 +197,7 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 		IsTask(a->tasks, DIS) + IsTask(a->tasks, HID) + IsTask(a->tasks, VIS) +
 		IsTask(a->tasks, END) + IsTask(a->tasks, CLS) + IsTask(a->tasks, REN) +
 		IsTask(a->tasks, MOV) + IsTask(a->tasks, SIZ) + IsTask(a->tasks, TOP) +
-		IsTask(a->tasks, NOT)
+		IsTask(a->tasks, NOT) + exist
 	);
 
 	form2 = ( // op on all windows
@@ -292,7 +322,8 @@ void Quit(const int Err)
 		"Unable to retrieve image names",									/* BADIMG 9 */
 		"Too many tasks have been specified",								/* TASKOL 10 */
 		"Unable to execute/open specified file",							/* EXEERR 11 */
-		"Only the /? and /RUN commands are supported on W95/98/ME platforms"/* VERERR 12 */
+		"Only the /? and /RUN commands are supported on W95/98/ME platforms",/* VERERR 12 */
+		"/SLP command requires milliseconds argument"                       /* SLPERR 13 */
 	};
 
 	DWORD cbWritten;

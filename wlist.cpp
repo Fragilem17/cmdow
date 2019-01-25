@@ -40,8 +40,9 @@ HWND GetMyHandle(void)
 //----------------------------------------------------------------------------
 void GetWindowList(struct WLIST *w)
 {
+	struct WLIST *wptr = w;
 	GetWindowInf(GetDesktopWindow(), w);
-	EnumWindows( (WNDENUMPROC) GetWindowListProc, (LPARAM) w);
+	EnumWindows( (WNDENUMPROC) GetWindowListProc, (LPARAM) &wptr);
 }
 
 //+---------------------------------------------------------------------------
@@ -52,24 +53,23 @@ void GetWindowList(struct WLIST *w)
 // window.
 //
 // Arguments: [hwnd] Window handle supplied by O/S
-//            [wptr] pointer to WLIST structure. Application defined parameter
-//                   supplied by GetWindowList.
+//            [wptrptr] pointer to pointer to WLIST structure. Application
+//                   defined parameter supplied by GetWindowList.
 //
 // Returns: TRUE to tell O/S its ready for (and wants) the next window handle
 //
-// Notes: wptr is initially copied into w. Everytime function is called by O/S
-// it dynamically creates a new WLIST structure thats linked to the original
-// pointer. The w pointer is then aimed at the new struct and info about the
-// window is gathered. If the window is a toplevel window (->level==1) then
-// a call to EnumChildWindows is made, again using this function as the callback
+// Notes: wptrptr is the current head of the list. Everytime function is called
+// by O/S it dynamically creates a new WLIST structure that's linked to the
+// original pointer. The w pointer is then aimed at the new struct and info
+// about the window is gathered. If the window is a toplevel window (->level==1)
+// then a call to EnumChildWindows is made, again using this function as the
+// callback
 //
 //----------------------------------------------------------------------------
-BOOL CALLBACK GetWindowListProc(HWND hwnd, LPARAM wptr)
+BOOL CALLBACK GetWindowListProc(HWND hwnd, LPARAM wptrptr)
 {
-	//
-	// onetime init of *w
-	//
-	static struct WLIST *w = (struct WLIST *) wptr;
+	struct WLIST **pwptr = (struct WLIST **) wptrptr;
+	struct WLIST *w = *pwptr;
 
 	//
 	// create a new WLIST struct
@@ -80,7 +80,7 @@ BOOL CALLBACK GetWindowListProc(HWND hwnd, LPARAM wptr)
 	//
 	// point to the new struct, then gather window info
 	//
-	w = w->next;
+	w = *pwptr = w->next;
 	GetWindowInf(hwnd, w);
 
 	//
@@ -92,7 +92,7 @@ BOOL CALLBACK GetWindowListProc(HWND hwnd, LPARAM wptr)
 	// If this is a toplevel window, then enumerate all its child windows
 	//
 
-	if(w->level==1) EnumChildWindows(hwnd, (WNDENUMPROC) GetWindowListProc, 0);
+	if(w->level==1) EnumChildWindows(hwnd, (WNDENUMPROC) GetWindowListProc, wptrptr);
 
 	return TRUE;
 }
@@ -196,6 +196,33 @@ BOOL GetWindowInf(HWND hwnd, struct WLIST *w)
 	else GetClassName(hwnd, w->caption, len + 1);
 
 	return TRUE;
+}
+
+//+---------------------------------------------------------------------------
+// Function: FreeWindowList
+//
+// Synopsis: Release the memory used by the window list
+//
+// Arguments: [*w] pointer to WLIST structure
+//
+// Returns: none
+//
+// Notes:
+//
+//----------------------------------------------------------------------------
+void FreeWindowList(struct WLIST *w)
+{
+	struct WLIST *n;
+
+	HeapFree(GetProcessHeap(), 0, w->caption);
+	n = w->next;
+	w->next = NULL;
+	while(n) {
+		w = n;
+		n = n->next;
+		HeapFree(GetProcessHeap(), 0, w->caption);
+		HeapFree(GetProcessHeap(), 0, w);
+	}
 }
 
 static void LstWinLen(struct WLIST *w, BOOL tb)
@@ -675,3 +702,7 @@ void NotWin(struct WLIST *w, struct ARGS *a)
 	);
 }
 
+void SlpWin(struct WLIST *w, struct ARGS *a)
+{
+	Sleep(a->sleep);
+}

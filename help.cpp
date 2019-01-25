@@ -50,6 +50,19 @@ printf(
 		"                 listed instead.\n\n");
 //		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 	}
+	else if(!lstrcmpi("/E", cmd)) {
+		printf(
+		"This form of CMDOW tests if a window exists.\n\n"
+//		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+		"  CMDOW window /E\n\n"
+//		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+		"  window  Window to list. Specify a window by its handle (in hex format, eg\n"
+		"          0x1A0142) or caption (window title). Caption is case insensitive.\n"
+        "          Use asterisk before/after caption to match zero or more characters.\n"
+		"          Windows without captions are matched by their ClassName. Use double\n"
+		"          quotes for captions containing whitespace or control characters.\n"
+		"  /E      Test if the window exists, returning 0 if so, 1 if not.\n");
+	}
 	else if((!lstrcmpi("/TH", cmd)) ||
 			(!lstrcmpi("/TV", cmd)) ||
 			(!lstrcmpi("/MA", cmd)) ||
@@ -215,6 +228,19 @@ printf(
 
 		"    CMDOW 0x0E0144 /hid /ren \"10%% complete\" /mov 0 0 /siz 300 100 /act /vis\n");
 	}
+	else if((!lstrcmpi("/SLP", cmd)) ||
+			(!lstrcmpi("/WAIT", cmd)) ||
+			(!lstrcmpi("milliseconds", cmd)) ||
+			(!lstrcmpi("/milliseconds", cmd))) {
+		printf(
+		"This form of CMDOW delays action(s) on the specified window(s).\n\n"
+//		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+		"  CMDOW window {[/SLP milliseconds] [/WAIT [milliseconds]]} ...\n\n"
+//		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+		"  /SLP    Sleep the specified number of milliseconds.\n"
+		"  /WAIT   Wait the specified number of milliseconds (default is indefinite) for\n"
+		"          the window to exist.\n");
+	}
 	else if((!lstrcmpi("/RUN", cmd)) ||
 			(!lstrcmpi("state", cmd)) ||
 			(!lstrcmpi("/state", cmd)) ||
@@ -261,10 +287,11 @@ printf(
 		"(C) Copyright 2001-2014 Ritchie Lawrence, http://www.commandline.co.uk.\n\n"
 //		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 		"  CMDOW [window | /T] [/B] [/F] [/P]\n"
+		"  CMDOW window /E\n"
 		"  CMDOW /TH | /TV | /MA | /CW | /UW | /AT | /FS | /WM\n"
 		"  CMDOW window {[/ACT] [/INA] [/ENA] [/DIS] [/VIS] [/HID] [/MIN] [/MAX] [/RES]\n"
 		"        [/REN caption] [/TOP] [/NOT] [/MOV left top] [/SIZ width height] [/CLS]\n"
-		"        [/END]}\n"
+		"        [/END] [/SLP milliseconds] [/WAIT [milliseconds]]}\n"
 		"  CMDOW /RUN [state] file [args]\n\n");
 //		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 		printf(
@@ -273,6 +300,8 @@ printf(
 		"  /B      List windows using bare format (no heading information).\n"
 		"  /F      List windows showing full information (don't truncate any fields).\n"
 		"  /P      List windows showing position and size (left, top, width and height).\n\n"
+//		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
+		"  /E      Test window exists.\n\n"
 //		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 		"  /TH     Tile windows horizontally.    /TV     Tile windows vertically.\n"
 		"  /MA     Minimize all windows.         /CW     Cascade windows.\n"
@@ -287,7 +316,8 @@ printf(
 		"  /RES    Restore specified window.     /REN    Rename specified window.\n"
 		"  /TOP    Make window always on top.    /NOT    Make window not always on top.\n"
 		"  /MOV    Move specified window.        /SIZ    Resize specified window.\n"
-		"  /CLS    Close specified window.       /END    Kill process linked to window.\n\n");
+		"  /CLS    Close specified window.       /END    Kill process linked to window.\n"
+		"  /SLP    Sleep for a time.             /WAIT   Wait for the window to exist.\n\n");
 //		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 		printf(
 		"  /RUN    Executes or opens specified file using associated application.\n"

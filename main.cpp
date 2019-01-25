@@ -107,12 +107,6 @@ int main(int argc, char* argv[])
 		// if handle not specified then create list of windows and search for caption
 		//
 		else {
-			//
-			// GetWindowList also loads the info for each window
-			//
-			GetWindowList(&wlist);
-			found = FALSE;
-			w = &wlist;
 			HWND me = GetMyHandle(); // don't match self (use @ for that)
 			int len = lstrlen(args.caption);
 			int op = 0; // exact match, 1 = left, 2 = right, 3 = in
@@ -125,51 +119,69 @@ int main(int argc, char* argv[])
 				--len;
 				op |= 2;
 			}
-			while(w) {
-				found = FALSE;
-				if(op == 0) {
-					if(!lstrcmpi(w->caption, args.caption)) {
-						found = TRUE;
+			while(TRUE) {
+				//
+				// GetWindowList also loads the info for each window
+				//
+				GetWindowList(&wlist);
+				w = &wlist;
+				while(w) {
+					found = FALSE;
+					if(op == 0) {
+						if(!lstrcmpi(w->caption, args.caption)) {
+							found = TRUE;
+						}
 					}
-				}
-				else if(w->hwnd != me) {
-					int s = lstrlen(w->caption);
-					if (s >= len) {
-						if(op == 1) {
-							if(!(CompareString(GetThreadLocale(),
-											   NORM_IGNORECASE,
-											   w->caption, len,
-											   args.caption, len) - 2)) {
-								found = TRUE;
-							}
-						}
-						else if(op == 2) {
-							if(!lstrcmpi(w->caption+s-len, args.caption)) {
-								found = TRUE;
-							}
-						}
-						else /*(op == 3)*/ {
-							for(s -= len; s >= 0; --s) {
-                                // CompareString function reference:-
-                                // http://msdn.microsoft.com/en-gb/library/windows/desktop/dd317759%28v=vs.85%29.aspx
+					else if(w->hwnd != me) {
+						int s = lstrlen(w->caption);
+						if (s >= len) {
+							if(op == 1) {
 								if(!(CompareString(GetThreadLocale(),
 												   NORM_IGNORECASE,
-												   w->caption + s, len,
+												   w->caption, len,
 												   args.caption, len) - 2)) {
 									found = TRUE;
 								}
 							}
+							else if(op == 2) {
+								if(!lstrcmpi(w->caption+s-len, args.caption)) {
+									found = TRUE;
+								}
+							}
+							else /*(op == 3)*/ {
+								for(s -= len; s >= 0; --s) {
+									// CompareString function reference:-
+									// http://msdn.microsoft.com/en-gb/library/windows/desktop/dd317759%28v=vs.85%29.aspx
+									if(!(CompareString(GetThreadLocale(),
+													   NORM_IGNORECASE,
+													   w->caption + s, len,
+													   args.caption, len) - 2)) {
+										found = TRUE;
+									}
+								}
+							}
 						}
 					}
-				}
 
-				if(found) {
-					wt = wt->next = w;
-					w = w->next;
-					wt->next = NULL;
-				} else w = w->next;
+					if(found) {
+						wt = wt->next = w;
+						w = w->next;
+						wt->next = NULL;
+					} else w = w->next;
+				}
+				if(wtlist.next) break;
+				if(!args.wait) Quit(NOTFND);
+				// a taskless wait is the test for existence, silently exit
+				if(*args.tasks == NONE) return(1);
+				// a negative value waits indefinitely
+				if(args.wait_ms >= 0) {
+					args.wait_ms -= 50;
+					if(args.wait_ms < 0) Quit(NOTFND);
+				}
+				FreeWindowList(&wlist);
+				wt = &wtlist;
+				Sleep(50);
 			}
-			if(!wtlist.next) Quit(NOTFND);
 		}
 
 		//
@@ -201,6 +213,7 @@ int main(int argc, char* argv[])
 					case END: fp = EndWin; break;
 					case TOP: fp = TopWin; break;
 					case NOT: fp = NotWin; break;
+					case SLP: fp = SlpWin; break;
 					default: fp = 0;
 				}
 				//

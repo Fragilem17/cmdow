@@ -34,7 +34,8 @@
 #define BADIMG		9		/* Unable to retrieve image names */
 #define TASKOL		10		/* Too many tasks have been specified */
 #define EXEERR		11		/* Unable to execute/open specified file */
-#define VERERR		12      /* Only the /? and /RUN commands are supported on W95/98/ME platforms */
+#define VERERR		12		/* Only the /? and /RUN commands are supported on W95/98/ME platforms */
+#define SLPERR		13		/* /SLP command requires milliseconds argument */
 
 
 
@@ -50,6 +51,7 @@ enum TASK {
 	REN, MOV, SIZ,
 	CLS, END, RUN,
 	TOP, NOT,
+	SLP,
 	RCW
 };
 
@@ -76,6 +78,8 @@ struct ARGS {
 	int 			actopts;		/* Options for actions upon selected windows */
 	int				left, top;		/* Holds coords for moving window */
 	int				width, height;	/* Used for resizing a window */
+	int 			sleep;			/* Sleep milliseconds */
+	int 			wait, wait_ms;	/* If waiting, and for how long */
 	char			*file;			/* File to open/run, used with /RUN */
 	char			*params;		/* Commandline params used with /RUN */
 	int				sw_state;		/* How window is displayed, used with /RUN */
@@ -122,6 +126,7 @@ BOOL IsTaskbarWindow(struct WLIST *w);
 void GetWindowList(struct WLIST *w);
 BOOL CALLBACK GetWindowListProc(HWND, LPARAM);
 BOOL GetWindowInf(HWND, struct WLIST *); // get info about window from its handle
+void FreeWindowList(struct WLIST *w);
 
 void PrintWindowInfHeadings(BOOL showpos, BOOL fullcapt);
 void PrintWindowInf(struct WLIST *w, BOOL showpos, BOOL showtb);
@@ -145,5 +150,6 @@ void EndWin(struct WLIST *w, struct ARGS *a);
 void RunWin(struct WLIST *w, struct ARGS *a);
 void TopWin(struct WLIST *w, struct ARGS *a);
 void NotWin(struct WLIST *w, struct ARGS *a);
+void SlpWin(struct WLIST *w, struct ARGS *a);
 
 int __cdecl _ConvertCommandLineToArgcArgv( void );
