@@ -9,6 +9,7 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	int form4;	/* count of form4 options - run/open a program/file */
 	int form5;  /* count of form5 options - rename this console window 7*/
 	int fcount;	/* count of number of forms used */
+	int exist;	/* test window exists (implemented via taskless wait) */
 
 	//
 	// init the args struct
@@ -29,6 +30,7 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	a->helpcmd = NULL;
 	a->myhwnd = GetMyHandle();
 	LoadString(&a->exename, argv[0]);
+	exist = FALSE;
 
 	//
 	// if no args default task is to list all windows
@@ -49,6 +51,10 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 			if(argc != 2) LoadString(&a->helpcmd, argv[++i]);
 			PushTask(a->tasks, HELP);
 			return;
+		}
+		else if(!lstrcmpi("/E", argv[i])) {
+			exist = 1;
+			a->wait = 1;
 		}
 		else if(!lstrcmpi("/B", argv[i])) a->listopts |= BARE;
 		else if(!lstrcmpi("/F", argv[i])) a->listopts |= FULLCAPT;
@@ -191,7 +197,7 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 		IsTask(a->tasks, DIS) + IsTask(a->tasks, HID) + IsTask(a->tasks, VIS) +
 		IsTask(a->tasks, END) + IsTask(a->tasks, CLS) + IsTask(a->tasks, REN) +
 		IsTask(a->tasks, MOV) + IsTask(a->tasks, SIZ) + IsTask(a->tasks, TOP) +
-		IsTask(a->tasks, NOT)
+		IsTask(a->tasks, NOT) + exist
 	);
 
 	form2 = ( // op on all windows
@@ -226,7 +232,7 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	else if(form2) { // op on all windows, one arg and no caption
 		if(a->cc || (form2 > 1) ) Quit(INCARG);
 	}
-	else if(!a->wait) { // form1. If caption do a LST else LISTALL, unless WAIT
+	else { // form1. If caption do a LST else LISTALL
 		if( (a->listopts & SHOWTB) && (a->cc) ) Quit(INCARG);
 		if(a->cc) PushTask(a->tasks, LST);
 		else PushTask(a->tasks, LISTALL);

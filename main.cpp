@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 				}
 				if(wtlist.next) break;
 				if(!args.wait) Quit(NOTFND);
-				// /WAIT by itself just tests for existence, silently exit
+				// a taskless wait is the test for existence, silently exit
 				if(*args.tasks == NONE) return(1);
 				// a negative value waits indefinitely
 				if(args.wait_ms >= 0) {
