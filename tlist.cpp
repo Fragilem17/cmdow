@@ -17,6 +17,8 @@ int GetTaskList(TMAP &tmap)
 		return(1);
 	}
 	do {
+		TMAP::iterator t = tmap.find(pe.th32ProcessID);
+		if(t != tmap.end()) free(t->second);
 		char *name = _strdup(pe.szExeFile);
 		// drop ".exe" to be compatible with previous versions
 		int len = lstrlen(name);
@@ -29,16 +31,17 @@ int GetTaskList(TMAP &tmap)
 
 char *GetImageName(DWORD pid)
 {
-	static int init;
+	static int failed;
 	static TMAP tmap;
 	static char Unknown[] = "Unknown";
 
-	if(!init++) {
-		if(GetTaskList(tmap)) return NULL;
-		// build list of tasks
-	}
+	if(failed) return Unknown;
 
 	TMAP::const_iterator t = tmap.find(pid);
+	if(t == tmap.end()) {
+		failed = GetTaskList(tmap);
+		t = tmap.find(pid);
+	}
 	if(t != tmap.end()) return t->second;
 	return Unknown;
 }
