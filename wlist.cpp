@@ -540,19 +540,58 @@ void RenWin(struct WLIST *w, struct ARGS *a)
 }
 
 //
+// Retrieve the bounding rectangle of a window: the monitor's work area for a
+// top-level window; otherwise the parent's client area.
+//
+void GetBounds(struct WLIST *w, RECT &r)
+{
+	if(w->level > 1) {
+		GetClientRect(w->parent, &r);
+	}
+	else {
+		HMONITOR monitor = MonitorFromWindow(w->hwnd, MONITOR_DEFAULTTONEAREST);
+		MONITORINFO mi;
+		mi.cbSize = sizeof(mi);
+		GetMonitorInfo(monitor, &mi);
+		r = mi.rcWork;
+	}
+}
+
+//
 // Move window to new top left coords
 //
 void MovWin(struct WLIST *w, struct ARGS *a)
 {
-	MoveWindow(w->hwnd, a->left, a->top,	w->width, w->height, TRUE);
+	int left = a->left, top = a->top;
+	if(a->movopts) {
+		RECT r;
+		GetBounds(w, r);
+		if(a->movopts & MOVHORZPC) left = (r.right - r.left) * left / 100;
+		if(a->movopts & MOVLEFT) left += r.left;
+		if(a->movopts & MOVRIGHT) left = r.right - left - w->width;
+		if(a->movopts & MOVVERTPC) top = (r.bottom - r.top) * top / 100;
+		if(a->movopts & MOVTOP) top += r.top;
+		if(a->movopts & MOVBOTTOM) top = r.bottom - top - w->height;
+	}
+	MoveWindow(w->hwnd, left, top, w->width, w->height, TRUE);
 }
 
 //
-// Resize window, to new height and width
+// Resize window to new height and width
 //
 void SizWin(struct WLIST *w, struct ARGS *a)
 {
-	MoveWindow(w->hwnd, w->left, w->top, a->width, a->height, TRUE);
+	int left = w->left, top = w->top;
+	int width = a->width, height = a->height;
+	if(a->sizopts & (SIZWIDTHPC | SIZHEIGHTPC)) {
+		RECT r;
+		GetBounds(w, r);
+		if(a->sizopts & SIZWIDTHPC) width = (r.right - r.left) * width / 100;
+		if(a->sizopts & SIZHEIGHTPC) height = (r.bottom - r.top) * height / 100;
+	}
+	if(a->sizopts & SIZLEFT) left += w->width - width;
+	if(a->sizopts & SIZTOP) top += w->height - height;
+	MoveWindow(w->hwnd, left, top, width, height, TRUE);
 }
 
 //

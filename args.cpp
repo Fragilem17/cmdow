@@ -1,5 +1,30 @@
 #include "header.h"
 
+int ParseNum(const char *arg, int &num, int &opts, int pcopt)
+{
+	char *end;
+
+	if(pcopt == MOVHORZPC) {
+		if(*arg == 'l') opts |= MOVLEFT, ++arg;
+		else if(*arg == 'r') opts |= MOVRIGHT, ++arg;
+	}
+	else if(pcopt == MOVVERTPC) {
+		if(*arg == 't') opts |= MOVTOP, ++arg;
+		else if(*arg == 'b') opts |= MOVBOTTOM, ++arg;
+	}
+	else if(pcopt == SIZWIDTHPC) {
+		if(*arg == 'l' || *arg == 'r') opts |= SIZLEFT, ++arg;
+	}
+	else if(pcopt == SIZHEIGHTPC) {
+		if(*arg == 't' || *arg == 'b') opts |= SIZTOP, ++arg;
+	}
+	num = strtol(arg, &end, 10);
+	if(end == arg) return(1);
+	if(*end == '%' && end[1] == '\0') opts |= pcopt;
+	else if(*end != '\0') return(1);
+	return(0);
+}
+
 void ParseArgs(int argc, char *argv[], struct ARGS *a)
 {
 	register int i;
@@ -22,6 +47,8 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	*a->tasks = (TASK) 0;
 	a->listopts = 0;
 	a->actopts = 0;
+	a->movopts = 0;
+	a->sizopts = 0;
 	a->cc = 0;
 	a->helpcmd = NULL;
 	a->myhwnd = GetMyHandle();
@@ -80,10 +107,8 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 			// next two args MUST be the new left and top coords
 			//
 			if( (i+2) < argc) {
-				a->left = atoi(argv[++i]);
-				a->top = atoi(argv[++i]);
-				if( (!a->left) && lstrcmp(argv[i-1], "0") ) Quit(MOVERR);
-				if( (!a->top) && lstrcmp(argv[i], "0") ) Quit(MOVERR);
+				if(ParseNum(argv[++i], a->left, a->movopts, MOVHORZPC)) Quit(MOVERR);
+				if(ParseNum(argv[++i], a->top, a->movopts, MOVVERTPC)) Quit(MOVERR);
 				}
 			else Quit(MOVERR);
 			}
@@ -93,10 +118,8 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 			//
 			PushTask(a->tasks, SIZ);
 			if( (i+2) < argc) {
-				a->width = atoi(argv[++i]);
-				a->height = atoi(argv[++i]);
-				if( (!a->width) && lstrcmp(argv[i-1], "0") ) Quit(SIZERR);
-				if( (!a->height) && lstrcmp(argv[i], "0") ) Quit(SIZERR);
+				if(ParseNum(argv[++i], a->width, a->sizopts, SIZWIDTHPC)) Quit(SIZERR);
+				if(ParseNum(argv[++i], a->height, a->sizopts, SIZHEIGHTPC)) Quit(SIZERR);
 				}
 			else Quit(SIZERR);
 			}
@@ -282,7 +305,7 @@ void Quit(const int Err)
 //       --1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 		"Memory allocation failed",											/* MEMERR 0 */
 		"/MOV command requires left and top arguments",						/* MOVERR 1 */
-		"/SIZ command requires width and height agrguments",				/* SIZERR 2 */
+		"/SIZ command requires width and height arguments",					/* SIZERR 2 */
 		"/REN command requires a new caption to be specified",				/* RENERR 3 */
 		"Unrecognized argument(s). Use CMDOW /? for help",					/* UNRARG 4 */
 		"Incompatible argument(s). Use CMDOW /? for help",					/* CONARG 5 */
