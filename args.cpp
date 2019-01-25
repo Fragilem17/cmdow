@@ -32,7 +32,7 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	int form2;	/* count of form2 options - operation performed on all windows */
 	int form3;	/* count of form3 options - operation performed on selected windows */
 	int form4;	/* count of form4 options - run/open a program/file */
-	int form5;  /* count of form5 options - rename this console window 7*/
+	int form5;	/* count of form5 options - rename this console window */
 	int fcount;	/* count of number of forms used */
 	int exist;	/* test window exists (implemented via taskless wait) */
 
@@ -240,7 +240,7 @@ void ParseArgs(int argc, char *argv[], struct ARGS *a)
 	if(form2) ++fcount;
 	if(form1) ++fcount;
 
-	// make sure only one, and only one form has been used
+	// make sure one, and only one, form has been used
 	if(fcount != 1) Quit(CONARG);
 
 	if(form5) {
@@ -311,14 +311,6 @@ HWND atoHandle(const char *src)
 	if(*p) return (HWND) (0);
 	else return h;
 }
-
-int atoCoord(const char *src)
-{
-	int i;
-	i = 0; atoi(src);
-	return i;
-}
-
 
 char *LoadString(char **dest, const char *src)
 {

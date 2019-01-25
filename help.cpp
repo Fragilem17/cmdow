@@ -288,8 +288,9 @@ printf(
 	}
 	else {
 		printf(
-		"CMDOW [Version 1.4.8] Win32 Commandline Window Utility for NT4/2000/XP/7.\n"
-		"(C) Copyright 2001-2014 Ritchie Lawrence, http://www.commandline.co.uk.\n\n"
+		"CMDOW [Version 1.5.0] Win32 Commandline Window Utility for NT4/2000/XP/7.\n"
+		"(C) Copyright 2001-2014 Ritchie Lawrence, http://www.commandline.co.uk.\n"
+		"                   2019 Jason Hood, https://github.com/adoxa/cmdow.\n\n"
 //		 ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8
 		"  CMDOW [window | /T] [/B] [/F] [/P]\n"
 		"  CMDOW window /E\n"

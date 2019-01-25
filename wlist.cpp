@@ -138,7 +138,7 @@ BOOL GetWindowInf(HWND hwnd, struct WLIST *w)
 	w->parent = parent = GetParent(hwnd);
 
 	//
-	// determine windows' level. 0=desktop, 1=toplevel, 2+ = child
+	// determine window's level. 0=desktop, 1=toplevel, 2+ = child
 	//
 	if(hwnd == desktop) w->level = 0;
 	else if( (parent == w->owner) || (parent == desktop) ) w->level = 1;
@@ -151,7 +151,7 @@ BOOL GetWindowInf(HWND hwnd, struct WLIST *w)
 	}
 
 	//
-	// Get windows' coords and determine width and height
+	// Get window's coords and determine width and height
 	//
 	GetWindowRect(hwnd, &rect);
 	w->left = rect.left;
@@ -315,7 +315,7 @@ void LstWin(struct WLIST *w, struct ARGS *a)
 //
 // Notes: I couldn't find any documentation on this but it appears a window is
 // shown on the taskbar if: -
-//	> its not hidden AND
+//	> it's not hidden AND
 //	> does not have WS_EX_TOOLWINDOW style AND
 //	> does not have an owner AND
 //  > is level 1
@@ -407,7 +407,7 @@ void ResWin(struct WLIST *w, struct ARGS *a)
 }
 
 //
-// Activate the window, if window is hidden, it gets focus but stays hidden,
+// Activate the window, if window is hidden, it gets focus but stays hidden
 //
 void ActWin(struct WLIST *w, struct ARGS *a)
 {
@@ -424,7 +424,6 @@ void InaWin(struct WLIST *w, struct ARGS *a)
 	//
 	if(w->hwnd == GetForegroundWindow()) AltTab();
 }
-
 
 //
 // Enable window
@@ -459,7 +458,7 @@ void VisWin(struct WLIST *w, struct ARGS *a)
 }
 
 //
-// politely ask the window to close
+// Politely ask the window to close
 //
 void ClsWin(struct WLIST *w, struct ARGS *a)
 {
@@ -467,24 +466,16 @@ void ClsWin(struct WLIST *w, struct ARGS *a)
 }
 
 //
-// End process associated with window (all windows with same Pid are killed!!!
+// End process associated with window (all windows with same Pid are killed!!!)
 //
 void EndWin(struct WLIST *w, struct ARGS *a)
 {
 	HANDLE hProcess;
 
-	hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, w->pid);
-	if (hProcess) {
-		hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, w->pid);
-		if (hProcess == NULL) {
-			return;
-		}
-		if(!TerminateProcess(hProcess, 1)) {
-			CloseHandle(hProcess);
-			return;
-		}
+	hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, w->pid);
+	if(hProcess) {
+		TerminateProcess(hProcess, 1);
 		CloseHandle(hProcess);
-		return;
 	}
 }
 
@@ -568,7 +559,7 @@ void RenWin(struct WLIST *w, struct ARGS *a)
 
 //
 // Retrieve the bounding rectangle of a window: the monitor's work area for a
-// top-level window; otherwise the parent's client area.
+// top-level window; otherwise the parent's client area
 //
 void GetBounds(struct WLIST *w, RECT &r)
 {
@@ -628,40 +619,6 @@ void RunWin(struct WLIST *w, struct ARGS *a)
 {
 	#define SHELLEXEC_SUCCESS 33
 	int RetVal;
-	// FindExecutable() Retrieves the name of and handle to the executable (.exe) file associated with the specified file name
-	/*STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-	char buf[1024];
-	HMODULE hModule;
-
-
-	hModule = GetModuleHandle(a->cmdline);
-    GetModuleFileName(hModule, buf, 1024);
-
-	FindExecutable(a->cmdline, NULL, buf);
-
-
-	ZeroMemory(&si, sizeof(si));
-
-	//si.dwFlags = STARTF_USESHOWWINDOW;
-	//si.wShowWindow = SW_HIDE;
-	si.lpTitle = "Rascal";
-
-	CreateProcess(
-		NULL,						// appname
-		a->cmdline,					// cmdline
-		NULL,						// process security attribs
-		NULL,						// thread security attribs
-		TRUE,						// inherit handles
-		0,							// creation flags
-		NULL,						// new environment block
-		NULL,						// current directory name
-		&si,						// startupinfo
-		&pi							// processinfo
-	);
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);*/
-//	printf("file [%s], params [%s]\n", a->file, a->params);
 
 	RetVal = (int) ShellExecute(NULL, NULL, a->file, a->params, NULL, a->sw_state);
 	if(RetVal < SHELLEXEC_SUCCESS) Quit(EXEERR);
@@ -671,7 +628,7 @@ void RunWin(struct WLIST *w, struct ARGS *a)
 // Function: AltTab
 //
 // Synopsis: Activates taskbar window with the lowest Z order. In the event of
-//           there being no taskbar windows, the desptop is activated.
+//           there being no taskbar windows, the desktop is activated.
 //
 // Arguments: None
 //
@@ -682,7 +639,7 @@ void RunWin(struct WLIST *w, struct ARGS *a)
 //        the lowest window, this moves to the top of the Z order, and all other
 //        move down one. If this function was to activate the next window in the
 //        Z order, then repeated calls to this function would only alternate
-//        between two windows (as happens when repeatly pressing [Alt]-[Tab])
+//        between two windows (as happens when repeatedly pressing [Alt]-[Tab])
 //
 //----------------------------------------------------------------------------
 void AltTab(void)
@@ -692,7 +649,7 @@ void AltTab(void)
 	long styles;
 	//
 	// a handle to any toplevel window is required, so may as well use this
-	// consoles' handle, as guaranteed to exist
+	// console's handle, as guaranteed to exist
 	//
 	me = GetMyHandle();
 

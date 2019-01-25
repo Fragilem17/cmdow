@@ -36,17 +36,14 @@ int main(int argc, char* argv[])
 			ShowHelp(args.helpcmd);
 			break;
 		case CW:
-			//CascadeWindows(NULL, 0, NULL, 0, NULL);
 			hWnd = FindWindow("Shell_TrayWnd", "");
 			if(hWnd) PostMessage(hWnd, WM_COMMAND, WM_CASCADE_WINDOWS, 0);
 			break;
 		case TV: // tile vertically
-			//TileWindows(NULL, MDITILE_VERTICAL, NULL, 0, NULL);
 			hWnd = FindWindow("Shell_TrayWnd", "");
 			if(hWnd) PostMessage(hWnd, WM_COMMAND, WM_TILE_VERTICALLY, 0);
 			break;
 		case TH: // tile horizontally
-			//TileWindows(NULL, MDITILE_HORIZONTAL, NULL, 0, NULL);
 			hWnd = FindWindow("Shell_TrayWnd", "");
 			if(hWnd) PostMessage(hWnd, WM_COMMAND, WM_TILE_HORIZONTALLY, 0);
 			break;
@@ -54,21 +51,12 @@ int main(int argc, char* argv[])
 			AltTab();
 			break;
 		case MA: // minimize all
-			//keybd_event(VK_LWIN, 0, 0, 0);
-			//keybd_event(77, 0, 0, 0); // 77 is 'M'
-			//keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, 0);
 			hWnd = FindWindow("Shell_TrayWnd", "");
 			if(hWnd) PostMessage(hWnd, WM_COMMAND, WM_MINIMIZE_ALL, 0);
  			break;
 		case UW: // undo minimize all
-			//keybd_event(VK_LWIN, 0, 0, 0);
-			//keybd_event(VK_SHIFT, 0, 0, 0);
-			//keybd_event(77, 0, 0, 0);
-			//keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, 0);
-			//keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, 0);
-			//break;
 			hWnd = FindWindow("Shell_TrayWnd", "");
-			if(hWnd) PostMessage(hWnd, WM_COMMAND, 416, 0);
+			if(hWnd) PostMessage(hWnd, WM_COMMAND, WM_UNDO_WINDOWS, 0);
 			break;
 		case WM: // switch to window mode
 			res = WINDOW_MODE;

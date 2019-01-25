@@ -1,4 +1,3 @@
-//#ifdef _MERGE_RDATA_
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 #define _WIN32_WINNT 0x0500
 
@@ -7,15 +6,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <shellapi.h>
-#include <winperf.h>
-#include <conio.h>
 
 //
 #define WM_CASCADE_WINDOWS		(403)
 #define WM_TILE_HORIZONTALLY	(404)
 #define WM_TILE_VERTICALLY		(405)
 #define WM_MINIMIZE_ALL			(415)
-#define WM_UNDO_WINDOWS			(413)
+#define WM_UNDO_WINDOWS			(416)
 
 // Used by Set/GetConsoleDisplayMode functions
 #define FULL_SCREEN_MODE	1
@@ -24,7 +21,7 @@
 /* Error messages */
 #define MEMERR		0		/* Memory allocation failed */
 #define MOVERR		1		/* /MOV command requires left and top arguments */
-#define SIZERR		2		/* /SIZ command requires width and height agrguments */
+#define SIZERR		2		/* /SIZ command requires width and height arguments */
 #define RENERR		3		/* /REN command requires a new caption to be specified */
 #define UNRARG		4		/* Unrecognized argument(s). Use CMDOW /? for help */
 #define CONARG		5		/* Conflicting argument(s). Use CMDOW /? for help */
@@ -126,7 +123,6 @@ enum TASK PopTask(enum TASK tasks[]);
 int IsTask(enum TASK tasks[], enum TASK t);
 char *LoadString(char **dest, const char *src);
 HWND atoHandle(const char *);
-int atoCoord(const char *);
 char *GetArgs();
 char *GetRestCmdline(char *Cmd);
 
@@ -169,5 +165,3 @@ void RunWin(struct WLIST *w, struct ARGS *a);
 void TopWin(struct WLIST *w, struct ARGS *a);
 void NotWin(struct WLIST *w, struct ARGS *a);
 void SlpWin(struct WLIST *w, struct ARGS *a);
-
-int __cdecl _ConvertCommandLineToArgcArgv( void );
